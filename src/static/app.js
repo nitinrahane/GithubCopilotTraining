@@ -19,27 +19,74 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
-        const participantsList = details.participants.length > 0
-          ? `<ul>${details.participants.map(p => `<li><span>${p}</span><button class="delete-btn" data-activity="${name}" data-email="${p}" title="Remove participant">✕</button></li>`).join('')}</ul>`
-          : '<p class="no-participants">No participants yet</p>';
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          <div class="participants-section">
-            <strong>Current Participants:</strong>
-            ${participantsList}
-          </div>
-        `;
+        const title = document.createElement("h4");
+        title.textContent = name;
+        activityCard.appendChild(title);
+
+        const description = document.createElement("p");
+        description.textContent = details.description;
+        activityCard.appendChild(description);
+
+        const schedule = document.createElement("p");
+        const scheduleLabel = document.createElement("strong");
+        scheduleLabel.textContent = "Schedule:";
+        schedule.appendChild(scheduleLabel);
+        schedule.appendChild(document.createTextNode(` ${details.schedule}`));
+        activityCard.appendChild(schedule);
+
+        const availability = document.createElement("p");
+        const availabilityLabel = document.createElement("strong");
+        availabilityLabel.textContent = "Availability:";
+        availability.appendChild(availabilityLabel);
+        availability.appendChild(document.createTextNode(` ${spotsLeft} spots left`));
+        activityCard.appendChild(availability);
+
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants-section";
+
+        const participantsLabel = document.createElement("strong");
+        participantsLabel.textContent = "Current Participants:";
+        participantsSection.appendChild(participantsLabel);
+
+        if (details.participants.length > 0) {
+          const participantsList = document.createElement("ul");
+
+          details.participants.forEach((p) => {
+            const listItem = document.createElement("li");
+
+            const participantName = document.createElement("span");
+            participantName.textContent = p;
+            listItem.appendChild(participantName);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-btn";
+            deleteButton.dataset.activity = name;
+            deleteButton.dataset.email = p;
+            deleteButton.title = "Remove participant";
+            deleteButton.setAttribute("aria-label", `Remove participant ${p}`);
+            deleteButton.textContent = "✕";
+            listItem.appendChild(deleteButton);
+
+            participantsList.appendChild(listItem);
+          });
+
+          participantsSection.appendChild(participantsList);
+        } else {
+          const noParticipants = document.createElement("p");
+          noParticipants.className = "no-participants";
+          noParticipants.textContent = "No participants yet";
+          participantsSection.appendChild(noParticipants);
+        }
+
+        activityCard.appendChild(participantsSection);
 
         // Add delete button event listeners
         activityCard.querySelectorAll('.delete-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             e.preventDefault();
-            const activity = btn.getAttribute('data-activity');
-            const email = btn.getAttribute('data-email');
+            const activity = btn.dataset.activity;
+            const email = btn.dataset.email;
             
             try {
               const response = await fetch(

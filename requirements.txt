@@ -5,3 +5,4 @@ watchfiles
 pytest
 pytest-asyncio
 pytest-cov
+email-validator
